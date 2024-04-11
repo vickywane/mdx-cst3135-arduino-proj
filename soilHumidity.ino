@@ -1,36 +1,50 @@
 #include <SoilHygrometer.h>
 
-//SoilHygrometer hygrometer(A0);
+int humidityValue;
+int toggleControllerValue;
 
 const int hygrometer = A0;
-int value;
+const int PUMP_PIN = 8;
+const int LIGHT_LED_ALERT_PIN = 9;
+const int BUZZER_PIN = 4;
 
 void setup() {
-  // put your setup code here, to run once:
+  // set BAUD rate
   Serial.begin(9600);
-  Serial.println("SOIL HUMIDITY CODE IS RUNNING!");
 
-  // pinMode(6, OUTPUT);
+  // set power pins
+  pinMode(PUMP_PIN, OUTPUT);
+  pinMode(LIGHT_LED_ALERT_PIN, OUTPUT);
+  pinMode(BUZZER_PIN, OUTPUT);
+
+  Serial.println("SproutCare Arduino Automated Water System Project!");
 }
- 
+
 void loop() {
-  // digitalWrite(LED_BUILTIN, HIGH);
-  delay(1000);
+  delay(1500);
 
-  value = analogRead(hygrometer);
-  value = constrain(value,400,1023);
-  value = map(value,400,1023,100,0);
+  // READ SOIL HUMIDITY FROM HYGROMETER
+  humidityValue = analogRead(hygrometer);
+  humidityValue = constrain(humidityValue, 400, 1023);
+  humidityValue = map(humidityValue, 400, 1023, 100, 0);
 
+  // notes: higher humidity value means more water in the system... lower value means less water. 
+  if (humidityValue <= 65) {
+    Serial.println((String)"-> Soil humidity is low at "+humidityValue+' '+". Adding water!");
+    Serial.println();
 
-  Serial.println("CURRENT HUMIDITY IS: ");
-  Serial.println(value);
+    // turn on LED_ALERT and WATERING PUMP
+    digitalWrite(LIGHT_LED_ALERT_PIN, HIGH);
+    digitalWrite(PUMP_PIN, HIGH); 
+    digitalWrite(BUZZER_PIN, HIGH); 
+  } else {
+    Serial.println((String)"-> Soil humidity is adequate for plant at "+humidityValue+' '+".");
 
-  // add a conditional statement to toggle pump on & off. 
+    // turn off LED_ALERT, WATERING PUMP & BUZZER
+    digitalWrite(LIGHT_LED_ALERT_PIN, LOW);
+    digitalWrite(PUMP_PIN, LOW);  
+    digitalWrite(BUZZER_PIN, LOW);    
+  }
 
-  // digitalWrite(6, LOW);
-  // delay(300);
-  // put your main code here,  to run repeatedly:
-  //  hygrometer.print("Soil hygrometer value: ", 0, 100);  
-
-  delay(1000);
+  delay(1500);
 }
